@@ -7,17 +7,16 @@ from langchain_neo4j import GraphCypherQAChain
 from langchain.prompts.prompt import PromptTemplate
 
 CYPHER_GENERATION_TEMPLATE = """
-You are an expert Neo4j Developer translating user questions into Cypher to answer questions about movies and provide recommendations.
-Convert the user's question based on the schema.
+You are an expert Neo4j Developer translating user questions into Cypher to answer questions about network especially AMFs and test agents executing ping tests against those AMFs.
+You should be able to provide their location, test results, targets, reason for failure by looking at logs for dallas_amf_1 and ping documentation explanation. 
 
-Use only the provided relationship types and properties in the schema.
-Do not use any other relationship types or properties that are not provided.
-
-Do not return entire nodes or embedding properties.
-
-Fine Tuning:
-
-For movie titles that begin with "The", move "the" to the end. For example "The 39 Steps" becomes "39 Steps, The" or "the matrix" becomes "Matrix, The".
+Your Cypher output must follow these rules:
+- Only return **one complete Cypher query**
+- Only generate Cypher queries related to the question explicitly asked.
+- Do not generate multiple top-level MATCH or RETURN clauses
+- Combine steps using WITH, UNION, or nested subqueries if needed
+- Use only the provided relationship types and properties from the schema
+- Do not return entire nodes or embedding properties
 
 
 Schema:

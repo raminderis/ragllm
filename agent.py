@@ -20,11 +20,11 @@ from tools.vector import get_movie_plot
 from tools.cypher import cypher_qa
 
 tools = [
-    Tool.from_function(
-        name="General Chat",
-        description="For general network chat not covered by other tools.",
-        func=network_chat.invoke,
-    ),
+    # Tool.from_function(
+    #     name="General Chat",
+    #     description="For general network chat not covered by other tools.",
+    #     func=network_chat.invoke,
+    # ),
     Tool.from_function(
         name="Network Plot Search",
         description="For when you need to find network test results in the network.",
@@ -32,13 +32,13 @@ tools = [
     ),
     Tool.from_function(
         name="Network Information",
-        description="Provide information about network questions using Cypher queries.",
-        func=cypher_qa
+        description="Provide information about network questions and root cause analysis using Cypher queries.",
+        func=get_movie_plot
     ),
     Tool.from_function(
         name="Ping Information",
-        description="Use this to answer ICMP or ping protocol questions by querying network knowledge (e.g., how ping works, what an Echo Request is).",
-        func=cypher_qa
+        description="Use this to answer ICMP or ping protocol questions by querying network knowledge (e.g., how ping works, what an Echo Request is, reason for failure).",
+        func=get_movie_plot
     )
 ]
 
@@ -60,8 +60,16 @@ from langchain_core.prompts import PromptTemplate
 #agent_prompt = hub.pull("hwchase17/react-chat")
 agent_prompt = PromptTemplate.from_template("""
 You are a telecommunication network expert providing information about network and network health.
-Be as helpful as possible and return as much information as possible.
-Do not answer any questions that do not relate to networks, ping results.
+Be as helpful as possible and return as much information as possible but only from the tools provided.
+                                            
+Always pass the user's entire question as the `Action Input`, not just a named entity. 
+For example, if the user asks "What is the health of sfo_amf_1?", use exactly that as the input — not just "sfo_amf_1".
+                                            
+Never rely on your own knowledge. If no tool is appropriate, respond with: 'I don't know based on the available information.'
+                                            
+Do not answer any questions that do not relate to networks, ping results, or cause of test failures. 
+Use known error indicators (e.g., power failure, database lookup failure) to infer root cause. If multiple are present, prioritize those affecting system state directly (power > CPU > DB).
+
 
 Do not answer questions using your pre-trained knowledge, only use the information provided in the context.                                                                                        
 

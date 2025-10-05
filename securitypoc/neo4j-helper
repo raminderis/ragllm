@@ -1,0 +1,27 @@
+CREATE (u:User {username: "singh", homeCountry: "CA"})
+CREATE (ip:IP_Address {address: "190.22.113.5"})
+CREATE (geo:GeoLocation {country: "US"})
+CREATE (d:Device {deviceId: "ue432"})
+CREATE (net:NetworkSegment {segmentId: "segA", sensitivity: "high"})
+
+CREATE (u)-[:LOGGED_IN_FROM]->(ip)
+CREATE (ip)-[:BELONGS_TO]->(geo)
+CREATE (u)-[:USES_DEVICE]->(d)
+CREATE (d)-[:CONNECTED_TO]->(net)
+
+//
+CREATE (s:Session {
+  sessionId: "sess002",
+  startTime: datetime("2025-08-21T06:30:00"),
+  endTime: datetime("2025-08-25T06:45:00"),
+  status: "completed"
+})
+
+//
+MATCH (u:User {username: "singh"}), 
+      (d:Device {deviceId: "ue432"}), 
+      (ip:IP_Address {address: "190.22.113.5"}), 
+      (s:Session {sessionId: "sess002"})
+CREATE (u)-[:INITIATED_SESSION]->(s),
+       (s)-[:USED_DEVICE]->(d),
+       (s)-[:FROM_IP]->(ip)

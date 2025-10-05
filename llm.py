@@ -15,3 +15,6 @@ from langchain_openai import OpenAIEmbeddings
 embeddings = OpenAIEmbeddings(
     openai_api_key=st.secrets["OPENAI_API_KEY"]
 )
+
+print ("OpenAI Embeddings created")
+print (" embedding model", embeddings.model)

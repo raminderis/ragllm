@@ -1,0 +1,599 @@
+Action Input: what do you know about the entity of FRLDNXXXX00002 or entities that have this in its name?────────────────────────── Traceback (most recent call last) ───────────────────────────
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/any  
+  io/streams/memory.py:111 in receive                                                   
+                                                                                        
+    108 │   async def receive(self) -> T_co:                                            
+    109 │   │   await checkpoint()                                                      
+    110 │   │   try:                                                                    
+  ❱ 111 │   │   │   return self.receive_nowait()                                        
+    112 │   │   except WouldBlock:                                                      
+    113 │   │   │   # Add ourselves in the queue                                        
+    114 │   │   │   receive_event = Event()                                             
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/any  
+  io/streams/memory.py:106 in receive_nowait                                            
+                                                                                        
+    103 │   │   elif not self._state.open_send_channels:                                
+    104 │   │   │   raise EndOfStream                                                   
+    105 │   │                                                                           
+  ❱ 106 │   │   raise WouldBlock                                                        
+    107 │                                                                               
+    108 │   async def receive(self) -> T_co:                                            
+    109 │   │   await checkpoint()                                                      
+────────────────────────────────────────────────────────────────────────────────────────
+WouldBlock
+
+During handling of the above exception, another exception occurred:
+
+────────────────────────── Traceback (most recent call last) ───────────────────────────
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/any  
+  io/_core/_tasks.py:115 in fail_after                                                  
+                                                                                        
+    112 │   with get_async_backend().create_cancel_scope(                               
+    113 │   │   deadline=deadline, shield=shield                                        
+    114 │   ) as cancel_scope:                                                          
+  ❱ 115 │   │   yield cancel_scope                                                      
+    116 │                                                                               
+    117 │   if cancel_scope.cancelled_caught and current_time() >= cancel_scope.deadli  
+    118 │   │   raise TimeoutError                                                      
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/mcp  
+  /shared/session.py:272 in send_request                                                
+                                                                                        
+    269 │   │   │                                                                       
+    270 │   │   │   try:                                                                
+    271 │   │   │   │   with anyio.fail_after(timeout):                                 
+  ❱ 272 │   │   │   │   │   response_or_error = await response_stream_reader.receive()  
+    273 │   │   │   except TimeoutError:                                                
+    274 │   │   │   │   raise McpError(                                                 
+    275 │   │   │   │   │   ErrorData(                                                  
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/any  
+  io/streams/memory.py:119 in receive                                                   
+                                                                                        
+    116 │   │   │   self._state.waiting_receivers[receive_event] = receiver             
+    117 │   │   │                                                                       
+    118 │   │   │   try:                                                                
+  ❱ 119 │   │   │   │   await receive_event.wait()                                      
+    120 │   │   │   finally:                                                            
+    121 │   │   │   │   self._state.waiting_receivers.pop(receive_event, None)          
+    122                                                                                 
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/any  
+  io/_backends/_asyncio.py:1774 in wait                                                 
+                                                                                        
+    1771 │   │   if self.is_set():                                                      
+    1772 │   │   │   await AsyncIOBackend.checkpoint()                                  
+    1773 │   │   else:                                                                  
+  ❱ 1774 │   │   │   await self._event.wait()                                           
+    1775 │                                                                              
+    1776 │   def statistics(self) -> EventStatistics:                                   
+    1777 │   │   return EventStatistics(len(self._event._waiters))                      
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/lib/python3.12/asyncio/locks.py:212 in wait     
+                                                                                        
+    209 │   │   fut = self._get_loop().create_future()                                  
+    210 │   │   self._waiters.append(fut)                                               
+    211 │   │   try:                                                                    
+  ❱ 212 │   │   │   await fut                                                           
+    213 │   │   │   return True                                                         
+    214 │   │   finally:                                                                
+    215 │   │   │   self._waiters.remove(fut)                                           
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/lib/python3.12/asyncio/futures.py:287 in        
+  __await__                                                                             
+                                                                                        
+    284 │   def __await__(self):                                                        
+    285 │   │   if not self.done():                                                     
+    286 │   │   │   self._asyncio_future_blocking = True                                
+  ❱ 287 │   │   │   yield self  # This tells Task to wait for completion.               
+    288 │   │   if not self.done():                                                     
+    289 │   │   │   raise RuntimeError("await wasn't used with future")                 
+    290 │   │   return self.result()  # May raise too.                                  
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/lib/python3.12/asyncio/tasks.py:385 in          
+  __wakeup                                                                              
+                                                                                        
+     382 │                                                                              
+     383 │   def __wakeup(self, future):                                                
+     384 │   │   try:                                                                   
+  ❱  385 │   │   │   future.result()                                                    
+     386 │   │   except BaseException as exc:                                           
+     387 │   │   │   # This may also be a cancellation.                                 
+     388 │   │   │   self.__step(exc)                                                   
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/lib/python3.12/asyncio/futures.py:198 in        
+  result                                                                                
+                                                                                        
+    195 │   │   """                                                                     
+    196 │   │   if self._state == _CANCELLED:                                           
+    197 │   │   │   exc = self._make_cancelled_error()                                  
+  ❱ 198 │   │   │   raise exc                                                           
+    199 │   │   if self._state != _FINISHED:                                            
+    200 │   │   │   raise exceptions.InvalidStateError('Result is not ready.')          
+    201 │   │   self.__log_traceback = False                                            
+────────────────────────────────────────────────────────────────────────────────────────
+CancelledError: Cancelled by cancel scope 3410f2930
+
+During handling of the above exception, another exception occurred:
+
+────────────────────────── Traceback (most recent call last) ───────────────────────────
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/mcp  
+  /shared/session.py:271 in send_request                                                
+                                                                                        
+    268 │   │   │   │   timeout = self._session_read_timeout_seconds.total_seconds()    
+    269 │   │   │                                                                       
+    270 │   │   │   try:                                                                
+  ❱ 271 │   │   │   │   with anyio.fail_after(timeout):                                 
+    272 │   │   │   │   │   response_or_error = await response_stream_reader.receive()  
+    273 │   │   │   except TimeoutError:                                                
+    274 │   │   │   │   raise McpError(                                                 
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/lib/python3.12/contextlib.py:158 in __exit__    
+                                                                                        
+    155 │   │   │   │   # tell if we get the same exception back                        
+    156 │   │   │   │   value = typ()                                                   
+    157 │   │   │   try:                                                                
+  ❱ 158 │   │   │   │   self.gen.throw(value)                                           
+    159 │   │   │   except StopIteration as exc:                                        
+    160 │   │   │   │   # Suppress StopIteration *unless* it's the same exception that  
+    161 │   │   │   │   # was passed to throw().  This prevents a StopIteration         
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/any  
+  io/_core/_tasks.py:118 in fail_after                                                  
+                                                                                        
+    115 │   │   yield cancel_scope                                                      
+    116 │                                                                               
+    117 │   if cancel_scope.cancelled_caught and current_time() >= cancel_scope.deadli  
+  ❱ 118 │   │   raise TimeoutError                                                      
+    119                                                                                 
+    120                                                                                 
+    121 def move_on_after(delay: float | None, shield: bool = False) -> CancelScope:    
+────────────────────────────────────────────────────────────────────────────────────────
+TimeoutError
+
+During handling of the above exception, another exception occurred:
+
+────────────────────────── Traceback (most recent call last) ───────────────────────────
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/str  
+  eamlit/runtime/scriptrunner/exec_code.py:128 in exec_func_with_error_handling         
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/str  
+  eamlit/runtime/scriptrunner/script_runner.py:669 in code_to_exec                      
+                                                                                        
+  /Users/rasingh/Documents/Random/code/ai/llm-chatbot-python/bot.py:55 in <module>      
+                                                                                        
+    52 │   write_message('user', '🧑‍💻',prompt)                                         
+    53 │                                                                                
+    54 │   # Generate a response                                                        
+  ❱ 55 │   handle_submit(prompt)                                                        
+    56                                                                                  
+                                                                                        
+  /Users/rasingh/Documents/Random/code/ai/llm-chatbot-python/bot.py:39 in               
+  handle_submit                                                                         
+                                                                                        
+    36 │   # Handle the response                                                        
+    37 │   with st.spinner('Thinking...'):                                              
+    38 │   │   # # TODO: Replace this with a call to your LLM                           
+  ❱ 39 │   │   response = generate_response(message)                                    
+    40 │   │   # from time import sleep                                                 
+    41 │   │   # sleep(1)                                                               
+    42 │   │   write_message('assistant', '🕸️', response)                                
+                                                                                        
+  /Users/rasingh/Documents/Random/code/ai/llm-chatbot-python/agent.py:250 in            
+  generate_response                                                                     
+                                                                                        
+    247 │   # Invoke the agent with the user input                                      
+    248 │   with get_openai_callback() as cb:                                           
+    249 │   │   # response = chat_agent.invoke({'input': user_input}, {'configurable':  
+  ❱ 250 │   │   response = chat_agent.invoke({'input': user_input}, {'configurable': {  
+    251 │   │   print("Prompt exchange between Langchain and LLM Tokens: ", cb.prompt_  
+    252 │   │   print("Completion Tokens consumed by LLM: ", cb.completion_tokens)      
+    253 │   │   print("Total Tokens: ", cb.total_tokens)                                
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/lan  
+  gchain_core/runnables/base.py:5441 in invoke                                          
+                                                                                        
+    5438 │   │   config: Optional[RunnableConfig] = None,                               
+    5439 │   │   **kwargs: Optional[Any],                                               
+    5440 │   ) -> Output:                                                               
+  ❱ 5441 │   │   return self.bound.invoke(                                              
+    5442 │   │   │   input,                                                             
+    5443 │   │   │   self._merge_configs(config),                                       
+    5444 │   │   │   **{**self.kwargs, **kwargs},                                       
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/lan  
+  gchain_core/runnables/base.py:5441 in invoke                                          
+                                                                                        
+    5438 │   │   config: Optional[RunnableConfig] = None,                               
+    5439 │   │   **kwargs: Optional[Any],                                               
+    5440 │   ) -> Output:                                                               
+  ❱ 5441 │   │   return self.bound.invoke(                                              
+    5442 │   │   │   input,                                                             
+    5443 │   │   │   self._merge_configs(config),                                       
+    5444 │   │   │   **{**self.kwargs, **kwargs},                                       
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/lan  
+  gchain_core/runnables/base.py:3049 in invoke                                          
+                                                                                        
+    3046 │   │   │   │   │   if i == 0:                                                 
+    3047 │   │   │   │   │   │   input_ = context.run(step.invoke, input_, config, **k  
+    3048 │   │   │   │   │   else:                                                      
+  ❱ 3049 │   │   │   │   │   │   input_ = context.run(step.invoke, input_, config)      
+    3050 │   │   # finish the root run                                                  
+    3051 │   │   except BaseException as e:                                             
+    3052 │   │   │   run_manager.on_chain_error(e)                                      
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/lan  
+  gchain_core/runnables/base.py:5441 in invoke                                          
+                                                                                        
+    5438 │   │   config: Optional[RunnableConfig] = None,                               
+    5439 │   │   **kwargs: Optional[Any],                                               
+    5440 │   ) -> Output:                                                               
+  ❱ 5441 │   │   return self.bound.invoke(                                              
+    5442 │   │   │   input,                                                             
+    5443 │   │   │   self._merge_configs(config),                                       
+    5444 │   │   │   **{**self.kwargs, **kwargs},                                       
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/lan  
+  gchain_core/runnables/base.py:4781 in invoke                                          
+                                                                                        
+    4778 │   │   │   TypeError: If the Runnable is a coroutine function.                
+    4779 │   │   """                                                                    
+    4780 │   │   if hasattr(self, "func"):                                              
+  ❱ 4781 │   │   │   return self._call_with_config(                                     
+    4782 │   │   │   │   self._invoke,                                                  
+    4783 │   │   │   │   input,                                                         
+    4784 │   │   │   │   ensure_config(config),                                         
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/lan  
+  gchain_core/runnables/base.py:1938 in _call_with_config                               
+                                                                                        
+    1935 │   │   │   with set_config_context(child_config) as context:                  
+    1936 │   │   │   │   output = cast(                                                 
+    1937 │   │   │   │   │   "Output",                                                  
+  ❱ 1938 │   │   │   │   │   context.run(                                               
+    1939 │   │   │   │   │   │   call_func_with_variable_args,  # type: ignore[arg-typ  
+    1940 │   │   │   │   │   │   func,                                                  
+    1941 │   │   │   │   │   │   input_,                                                
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/lan  
+  gchain_core/runnables/config.py:429 in call_func_with_variable_args                   
+                                                                                        
+    426 │   │   │   kwargs["config"] = config                                           
+    427 │   if run_manager is not None and accepts_run_manager(func):                   
+    428 │   │   kwargs["run_manager"] = run_manager                                     
+  ❱ 429 │   return func(input, **kwargs)  # type: ignore[call-arg]                      
+    430                                                                                 
+    431                                                                                 
+    432 def acall_func_with_variable_args(                                              
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/lan  
+  gchain_core/runnables/base.py:4650 in _invoke                                         
+                                                                                        
+    4647 │   │   │   │   │   f"Recursion limit reached when invoking {self} with input  
+    4648 │   │   │   │   )                                                              
+    4649 │   │   │   │   raise RecursionError(msg)                                      
+  ❱ 4650 │   │   │   output = output.invoke(                                            
+    4651 │   │   │   │   input_,                                                        
+    4652 │   │   │   │   patch_config(                                                  
+    4653 │   │   │   │   │   config,                                                    
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/lan  
+  gchain_core/runnables/base.py:5441 in invoke                                          
+                                                                                        
+    5438 │   │   config: Optional[RunnableConfig] = None,                               
+    5439 │   │   **kwargs: Optional[Any],                                               
+    5440 │   ) -> Output:                                                               
+  ❱ 5441 │   │   return self.bound.invoke(                                              
+    5442 │   │   │   input,                                                             
+    5443 │   │   │   self._merge_configs(config),                                       
+    5444 │   │   │   **{**self.kwargs, **kwargs},                                       
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/lan  
+  gchain/chains/base.py:165 in invoke                                                   
+                                                                                        
+    162 │   │   try:                                                                    
+    163 │   │   │   self._validate_inputs(inputs)                                       
+    164 │   │   │   outputs = (                                                         
+  ❱ 165 │   │   │   │   self._call(inputs, run_manager=run_manager)                     
+    166 │   │   │   │   if new_arg_supported                                            
+    167 │   │   │   │   else self._call(inputs)                                         
+    168 │   │   │   )                                                                   
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/lan  
+  gchain/agents/agent.py:1625 in _call                                                  
+                                                                                        
+    1622 │   │   start_time = time.time()                                               
+    1623 │   │   # We now enter the agent loop (until it returns something).            
+    1624 │   │   while self._should_continue(iterations, time_elapsed):                 
+  ❱ 1625 │   │   │   next_step_output = self._take_next_step(                           
+    1626 │   │   │   │   name_to_tool_map,                                              
+    1627 │   │   │   │   color_mapping,                                                 
+    1628 │   │   │   │   inputs,                                                        
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/lan  
+  gchain/agents/agent.py:1325 in _take_next_step                                        
+                                                                                        
+    1322 │   │   run_manager: Optional[CallbackManagerForChainRun] = None,              
+    1323 │   ) -> Union[AgentFinish, list[tuple[AgentAction, str]]]:                    
+    1324 │   │   return self._consume_next_step(                                        
+  ❱ 1325 │   │   │   list(                                                              
+    1326 │   │   │   │   self._iter_next_step(                                          
+    1327 │   │   │   │   │   name_to_tool_map,                                          
+    1328 │   │   │   │   │   color_mapping,                                             
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/lan  
+  gchain/agents/agent.py:1408 in _iter_next_step                                        
+                                                                                        
+    1405 │   │   for agent_action in actions:                                           
+    1406 │   │   │   yield agent_action                                                 
+    1407 │   │   for agent_action in actions:                                           
+  ❱ 1408 │   │   │   yield self._perform_agent_action(                                  
+    1409 │   │   │   │   name_to_tool_map,                                              
+    1410 │   │   │   │   color_mapping,                                                 
+    1411 │   │   │   │   agent_action,                                                  
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/lan  
+  gchain/agents/agent.py:1433 in _perform_agent_action                                  
+                                                                                        
+    1430 │   │   │   if return_direct:                                                  
+    1431 │   │   │   │   tool_run_kwargs["llm_prefix"] = ""                             
+    1432 │   │   │   # We then call the tool on the tool input to get an observation    
+  ❱ 1433 │   │   │   observation = tool.run(                                            
+    1434 │   │   │   │   agent_action.tool_input,                                       
+    1435 │   │   │   │   verbose=self.verbose,                                          
+    1436 │   │   │   │   color=color,                                                   
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/lan  
+  gchain_core/tools/base.py:888 in run                                                  
+                                                                                        
+     885 │   │                                                                          
+     886 │   │   if error_to_raise:                                                     
+     887 │   │   │   run_manager.on_tool_error(error_to_raise)                          
+  ❱  888 │   │   │   raise error_to_raise                                               
+     889 │   │   output = _format_output(content, artifact, tool_call_id, self.name, s  
+     890 │   │   run_manager.on_tool_end(output, color=color, name=self.name, **kwargs  
+     891 │   │   return output                                                          
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/lan  
+  gchain_core/tools/base.py:857 in run                                                  
+                                                                                        
+     854 │   │   │   │   │   tool_kwargs |= {"run_manager": run_manager}                
+     855 │   │   │   │   if config_param := _get_runnable_config_param(self._run):      
+     856 │   │   │   │   │   tool_kwargs |= {config_param: config}                      
+  ❱  857 │   │   │   │   response = context.run(self._run, *tool_args, **tool_kwargs)   
+     858 │   │   │   if self.response_format == "content_and_artifact":                 
+     859 │   │   │   │   if not isinstance(response, tuple) or len(response) != 2:      
+     860 │   │   │   │   │   msg = (                                                    
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/lan  
+  gchain_core/tools/simple.py:105 in _run                                               
+                                                                                        
+    102 │   │   │   │   kwargs["callbacks"] = run_manager.get_child()                   
+    103 │   │   │   if config_param := _get_runnable_config_param(self.func):           
+    104 │   │   │   │   kwargs[config_param] = config                                   
+  ❱ 105 │   │   │   return self.func(*args, **kwargs)                                   
+    106 │   │   msg = "Tool does not support sync invocation."                          
+    107 │   │   raise NotImplementedError(msg)                                          
+    108                                                                                 
+                                                                                        
+  /Users/rasingh/Documents/Random/code/ai/llm-chatbot-python/agent.py:109 in sync_tool  
+                                                                                        
+    106 │   │   │   await db_agent_runner.start_session()                               
+    107 │   │   return await db_agent_runner.run(q)                                     
+    108 │                                                                               
+  ❱ 109 │   return sync_wrapper(ensure_session_then_run, query)                         
+    110                                                                                 
+    111                                                                                 
+    112 # def sync_wrapper(coro_func, *args, **kwargs):                                 
+                                                                                        
+  /Users/rasingh/Documents/Random/code/ai/llm-chatbot-python/agent.py:133 in            
+  sync_wrapper                                                                          
+                                                                                        
+    130 │   │   if loop.is_running():                                                   
+    131 │   │   │   return asyncio.ensure_future(coro_func(*args, **kwargs))            
+    132 │   │   else:                                                                   
+  ❱ 133 │   │   │   return loop.run_until_complete(coro_func(*args, **kwargs))          
+    134 │   except RuntimeError:                                                        
+    135 │   │   # Fallback: create new loop                                             
+    136 │   │   new_loop = asyncio.new_event_loop()                                     
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/nes  
+  t_asyncio.py:98 in run_until_complete                                                 
+                                                                                        
+     95 │   │   │   if not f.done():                                                    
+     96 │   │   │   │   raise RuntimeError(                                             
+     97 │   │   │   │   │   'Event loop stopped before Future completed.')              
+  ❱  98 │   │   │   return f.result()                                                   
+     99 │                                                                               
+    100 │   def _run_once(self):                                                        
+    101 │   │   """                                                                     
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/lib/python3.12/asyncio/futures.py:203 in        
+  result                                                                                
+                                                                                        
+    200 │   │   │   raise exceptions.InvalidStateError('Result is not ready.')          
+    201 │   │   self.__log_traceback = False                                            
+    202 │   │   if self._exception is not None:                                         
+  ❱ 203 │   │   │   raise self._exception.with_traceback(self._exception_tb)            
+    204 │   │   return self._result                                                     
+    205 │                                                                               
+    206 │   def exception(self):                                                        
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/lib/python3.12/asyncio/tasks.py:316 in          
+  __step_run_and_handle_result                                                          
+                                                                                        
+     313 │   │   │   │   # don't have `__iter__` and `__next__` methods.                
+     314 │   │   │   │   result = coro.send(None)                                       
+     315 │   │   │   else:                                                              
+  ❱  316 │   │   │   │   result = coro.throw(exc)                                       
+     317 │   │   except StopIteration as exc:                                           
+     318 │   │   │   if self._must_cancel:                                              
+     319 │   │   │   │   # Task is cancelled right before coro stops.                   
+                                                                                        
+  /Users/rasingh/Documents/Random/code/ai/llm-chatbot-python/agent.py:107 in            
+  ensure_session_then_run                                                               
+                                                                                        
+    104 │   │   if not db_agent_runner.session or not getattr(db_agent_runner.session,  
+    105 │   │   │   print("XXXXX NOOOOO SESSION FOUND. Will Start session XXXXX")       
+    106 │   │   │   await db_agent_runner.start_session()                               
+  ❱ 107 │   │   return await db_agent_runner.run(q)                                     
+    108 │                                                                               
+    109 │   return sync_wrapper(ensure_session_then_run, query)                         
+    110                                                                                 
+                                                                                        
+  /Users/rasingh/Documents/Random/code/ai/llm-chatbot-python/AgentRunner.py:62 in run   
+                                                                                        
+    59 │   │                                                                            
+    60 │   │   content = UserContent(parts=[Part(text=new_message)])                    
+    61 │   │   result = None                                                            
+  ❱ 62 │   │   async for event in self.runner.run_async(                                
+    63 │   │   │   │   user_id=self.session.user_id,                                    
+    64 │   │   │   │   session_id=self.session.id,                                      
+    65 │   │   │   │   new_message=content):                                            
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/goo  
+  gle/adk/runners.py:233 in run_async                                                   
+                                                                                        
+    230 │   │   async for event in ctx.agent.run_async(ctx):                            
+    231 │   │     yield event                                                           
+    232 │                                                                               
+  ❱ 233 │     async for event in self._exec_with_plugin(                                
+    234 │   │     invocation_context, session, execute                                  
+    235 │     ):                                                                        
+    236 │   │   yield event                                                             
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/goo  
+  gle/adk/runners.py:274 in _exec_with_plugin                                           
+                                                                                        
+    271 │     yield early_exit_event                                                    
+    272 │   else:                                                                       
+    273 │     # Step 2: Otherwise continue with normal execution                        
+  ❱ 274 │     async for event in execute_fn(invocation_context):                        
+    275 │   │   if not event.partial:                                                   
+    276 │   │     await self.session_service.append_event(session=session, event=event  
+    277 │   │   # Step 3: Run the on_event callbacks to optionally modify the event.    
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/goo  
+  gle/adk/runners.py:230 in execute                                                     
+                                                                                        
+    227 │     invocation_context.agent = self._find_agent_to_run(session, root_agent)   
+    228 │                                                                               
+    229 │     async def execute(ctx: InvocationContext) -> AsyncGenerator[Event]:       
+  ❱ 230 │   │   async for event in ctx.agent.run_async(ctx):                            
+    231 │   │     yield event                                                           
+    232 │                                                                               
+    233 │     async for event in self._exec_with_plugin(                                
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/goo  
+  gle/adk/agents/base_agent.py:223 in run_async                                         
+                                                                                        
+    220 │     if ctx.end_invocation:                                                    
+    221 │   │   return                                                                  
+    222 │                                                                               
+  ❱ 223 │     async for event in self._run_async_impl(ctx):                             
+    224 │   │   yield event                                                             
+    225 │                                                                               
+    226 │     if ctx.end_invocation:                                                    
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/goo  
+  gle/adk/agents/llm_agent.py:290 in _run_async_impl                                    
+                                                                                        
+    287   async def _run_async_impl(                                                    
+    288 │     self, ctx: InvocationContext                                              
+    289   ) -> AsyncGenerator[Event, None]:                                             
+  ❱ 290 │   async for event in self._llm_flow.run_async(ctx):                           
+    291 │     self.__maybe_save_output_to_state(event)                                  
+    292 │     yield event                                                               
+    293                                                                                 
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/goo  
+  gle/adk/flows/llm_flows/base_llm_flow.py:334 in run_async                             
+                                                                                        
+    331 │   """Runs the flow."""                                                        
+    332 │   while True:                                                                 
+    333 │     last_event = None                                                         
+  ❱ 334 │     async for event in self._run_one_step_async(invocation_context):          
+    335 │   │   last_event = event                                                      
+    336 │   │   yield event                                                             
+    337 │     if not last_event or last_event.is_final_response() or last_event.partia  
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/goo  
+  gle/adk/flows/llm_flows/base_llm_flow.py:350 in _run_one_step_async                   
+                                                                                        
+    347 │   llm_request = LlmRequest()                                                  
+    348 │                                                                               
+    349 │   # Preprocess before calling the LLM.                                        
+  ❱ 350 │   async for event in self._preprocess_async(invocation_context, llm_request)  
+    351 │     yield event                                                               
+    352 │   if invocation_context.end_invocation:                                       
+    353 │     return                                                                    
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/goo  
+  gle/adk/flows/llm_flows/base_llm_flow.py:401 in _preprocess_async                     
+                                                                                        
+    398 │     from ...agents.llm_agent import _convert_tool_union_to_tools              
+    399 │                                                                               
+    400 │     # Then process all tools from this tool union                             
+  ❱ 401 │     tools = await _convert_tool_union_to_tools(                               
+    402 │   │     tool_union, ReadonlyContext(invocation_context)                       
+    403 │     )                                                                         
+    404 │     for tool in tools:                                                        
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/goo  
+  gle/adk/agents/llm_agent.py:124 in _convert_tool_union_to_tools                       
+                                                                                        
+    121   if isinstance(tool_union, Callable):                                          
+    122 │   return [FunctionTool(func=tool_union)]                                      
+    123                                                                                 
+  ❱ 124   return await tool_union.get_tools(ctx)                                        
+    125                                                                                 
+    126                                                                                 
+    127 class LlmAgent(BaseAgent):                                                      
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/goo  
+  gle/adk/tools/mcp_tool/mcp_session_manager.py:128 in wrapper                          
+                                                                                        
+    125   @functools.wraps(func)  # Preserves original function metadata                
+    126   async def wrapper(self, *args, **kwargs):                                     
+    127 │   try:                                                                        
+  ❱ 128 │     return await func(self, *args, **kwargs)                                  
+    129 │   except anyio.ClosedResourceError:                                           
+    130 │     # Simply retry the function - create_session will handle                  
+    131 │     # detecting and replacing disconnected sessions                           
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/goo  
+  gle/adk/tools/mcp_tool/mcp_toolset.py:153 in get_tools                                
+                                                                                        
+    150 │   session = await self._mcp_session_manager.create_session()                  
+    151 │                                                                               
+    152 │   # Fetch available tools from the MCP server                                 
+  ❱ 153 │   tools_response: ListToolsResult = await session.list_tools()                
+    154 │                                                                               
+    155 │   # Apply filtering based on context and tool_filter                          
+    156 │   tools = []                                                                  
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/mcp  
+  /client/session.py:386 in list_tools                                                  
+                                                                                        
+    383 │                                                                               
+    384 │   async def list_tools(self, cursor: str | None = None) -> types.ListToolsRe  
+    385 │   │   """Send a tools/list request."""                                        
+  ❱ 386 │   │   result = await self.send_request(                                       
+    387 │   │   │   types.ClientRequest(                                                
+    388 │   │   │   │   types.ListToolsRequest(                                         
+    389 │   │   │   │   │   method="tools/list",                                        
+                                                                                        
+  /Users/rasingh/.pyenv/versions/3.12.2/envs/myenv312/lib/python3.12/site-packages/mcp  
+  /shared/session.py:274 in send_request                                                
+                                                                                        
+    271 │   │   │   │   with anyio.fail_after(timeout):                                 
+    272 │   │   │   │   │   response_or_error = await response_stream_reader.receive()  
+    273 │   │   │   except TimeoutError:                                                
+  ❱ 274 │   │   │   │   raise McpError(                                                 
+    275 │   │   │   │   │   ErrorData(                                                  
+    276 │   │   │   │   │   │   code=httpx.codes.REQUEST_TIMEOUT,                       
+    277 │   │   │   │   │   │   message=(                                               
+────────────────────────────────────────────────────────────────────────────────────────
+McpError: Timed out while waiting for response to ClientRequest. Waited 5.0 seconds.

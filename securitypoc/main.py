@@ -1,4 +1,4 @@
-# export GOOGLE_API_KEY="AIzaSyBHmNd4tt8IAQmI1vuLaoxXoaCohTkpdJU"
+
 '''
 CREATE (u:User {username: "alice", homeCountry: "US"})
 CREATE (ip:IP_Address {address: "203.0.113.5"})
